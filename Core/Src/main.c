@@ -69,10 +69,9 @@ uint8_t pota[] = {0x01,0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};
 uint8_t val_nitro[9] = {0};
 uint8_t val_phos[9] = {0};
 uint8_t val_pota[9] = {0};
-uint8_t temp[9];
-uint8_t val1, val2, val3;
-uint8_t tempVal1[1];
-uint8_t temp_nitro[15], temp_phos[15], temp_pota[15];
+uint8_t temp_nitro[64] = {0};
+uint8_t temp_phos[64] = {0};
+uint8_t temp_pota[64] = {0};
 /* USER CODE END 0 */
 
 /**
@@ -327,9 +326,11 @@ void nitrogen(){
 
 		HAL_UART_Receive(&huart6, (uint8_t*)val_nitro, sizeof(val_nitro), 200);
 
-		sprintf(temp_nitro, "Nitrogen: %d\n", val_nitro[5]);
+		if(val_nitro[0]==0 && val_nitro[1]==1 && val_nitro[2]==3 && val_nitro[3]==2){
 
-		HAL_UART_Transmit(&huart2, (uint8_t*)temp_nitro, strlen(temp_nitro), 50);
+			sprintf(temp_nitro, "Nitrogen: %d\n", val_nitro[5]);
+			HAL_UART_Transmit(&huart2, (uint8_t*)temp_nitro, strlen(temp_nitro), 50);
+		}
 	}
 }
 
@@ -343,9 +344,11 @@ void phosphorous(){
 
 		HAL_UART_Receive(&huart6, (uint8_t*)val_phos, sizeof(val_phos), 200);
 
-		sprintf(temp_phos, "Phosphorous: %d\n", val_phos[5]);
+		if(val_phos[0]==0 && val_phos[1]==1 && val_phos[2]==3 && val_phos[3]==2){
 
-		HAL_UART_Transmit(&huart2, (uint8_t*)temp_phos, strlen(temp_phos), 50);
+			sprintf(temp_phos, "Phosphorous: %d\n", val_phos[5]);
+			HAL_UART_Transmit(&huart2, (uint8_t*)temp_phos, strlen(temp_phos), 50);
+		}
 	}
 }
 
@@ -359,9 +362,11 @@ void potassium(){
 
 		HAL_UART_Receive(&huart6, (uint8_t*)val_pota, sizeof(val_pota), 200);
 
-		sprintf(temp_pota, "Potassium: %d\n", val_pota[5]);
+		if(val_pota[0]==0 && val_pota[1]==1 && val_pota[2]==3 && val_pota[3]==2){
 
-		HAL_UART_Transmit(&huart2, (uint8_t*)temp_pota, strlen(temp_pota), 50);
+			sprintf(temp_pota, "Potassium: %d\n", val_pota[5]);
+			HAL_UART_Transmit(&huart2, (uint8_t*)temp_pota, strlen(temp_pota), 50);
+		}
 	}
 }
 /* USER CODE END 4 */
