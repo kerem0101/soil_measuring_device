@@ -24,6 +24,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include "../../16x2Lcd/LCD16x2.h"
+#include "../../16x2Lcd/LCD16x2.c"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,9 +58,9 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void nitrogen();
-void phosphorous();
-void potassium();
+void nitrogen(void);
+void phosphorous(void);
+void potassium(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -69,9 +71,9 @@ uint8_t pota[] = {0x01,0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};
 uint8_t val_nitro[9] = {0};
 uint8_t val_phos[9] = {0};
 uint8_t val_pota[9] = {0};
-uint8_t temp_nitro[64] = {0};
-uint8_t temp_phos[64] = {0};
-uint8_t temp_pota[64] = {0};
+char temp_nitro[16];
+char temp_phos[16];
+char temp_pota[16];
 /* USER CODE END 0 */
 
 /**
@@ -106,21 +108,22 @@ int main(void)
   MX_USART6_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  LCD_Init();
+  LCD_Clear();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	HAL_Delay(2000);
+	HAL_Delay(3000);
 
 	nitrogen();
-	HAL_Delay(250);
 	phosphorous();
-	HAL_Delay(250);
 	potassium();
-	HAL_Delay(250);
+
+	LCD_Set_Cursor(1, 1);
+	LCD_Write_String("Lutfen Bekleyin!");
 
     /* USER CODE END WHILE */
 
@@ -189,7 +192,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 4800;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -316,7 +319,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void nitrogen(){
+void nitrogen(void){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
 	HAL_Delay(10);
@@ -328,13 +331,16 @@ void nitrogen(){
 
 		if(val_nitro[0]==0 && val_nitro[1]==1 && val_nitro[2]==3 && val_nitro[3]==2){
 
-			sprintf(temp_nitro, "Nitrogen: %d\n", val_nitro[5]);
-			HAL_UART_Transmit(&huart2, (uint8_t*)temp_nitro, strlen(temp_nitro), 50);
+			sprintf(temp_nitro, "N: %d\n", val_nitro[5]);
+			HAL_UART_Transmit(&huart1, (uint8_t*)temp_nitro, strlen(temp_nitro), 50);
+		}
+		else{
+			HAL_UART_Transmit(&huart1, (uint8_t*)"N: NULL\n", strlen("N: NULL\n"), 50);
 		}
 	}
 }
 
-void phosphorous(){
+void phosphorous(void){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
 	HAL_Delay(10);
@@ -346,13 +352,16 @@ void phosphorous(){
 
 		if(val_phos[0]==0 && val_phos[1]==1 && val_phos[2]==3 && val_phos[3]==2){
 
-			sprintf(temp_phos, "Phosphorous: %d\n", val_phos[5]);
-			HAL_UART_Transmit(&huart2, (uint8_t*)temp_phos, strlen(temp_phos), 50);
+			sprintf(temp_phos, "P: %d\n", val_phos[5]);
+			HAL_UART_Transmit(&huart1, (uint8_t*)temp_phos, strlen(temp_phos), 50);
+		}
+		else{
+			HAL_UART_Transmit(&huart1, (uint8_t*)"P: NULL\n", strlen("P: NULL\n"), 50);
 		}
 	}
 }
 
-void potassium(){
+void potassium(void){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
 	HAL_Delay(10);
@@ -364,8 +373,11 @@ void potassium(){
 
 		if(val_pota[0]==0 && val_pota[1]==1 && val_pota[2]==3 && val_pota[3]==2){
 
-			sprintf(temp_pota, "Potassium: %d\n", val_pota[5]);
-			HAL_UART_Transmit(&huart2, (uint8_t*)temp_pota, strlen(temp_pota), 50);
+			sprintf(temp_pota, "K: %d\n", val_pota[5]);
+			HAL_UART_Transmit(&huart1, (uint8_t*)temp_pota, strlen(temp_pota), 50);
+		}
+		else{
+			HAL_UART_Transmit(&huart1, (uint8_t*)"K: NULL\n", strlen("K: NULL\n"), 50);
 		}
 	}
 }
