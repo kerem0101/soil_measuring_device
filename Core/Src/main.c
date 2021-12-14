@@ -58,9 +58,9 @@ static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void nitrogen(void);
-void phosphorous(void);
-void potassium(void);
+uint8_t nitrogen(void);
+uint8_t phosphorous(void);
+uint8_t potassium(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -68,12 +68,18 @@ void potassium(void);
 uint8_t nitro[] = {0x01,0x03, 0x00, 0x1e, 0x00, 0x01, 0xe4, 0x0c};
 uint8_t phos[] = {0x01,0x03, 0x00, 0x1f, 0x00, 0x01, 0xb5, 0xcc};
 uint8_t pota[] = {0x01,0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};
+
 uint8_t val_nitro[9] = {0};
 uint8_t val_phos[9] = {0};
 uint8_t val_pota[9] = {0};
+
 char temp_nitro[16];
 char temp_phos[16];
 char temp_pota[16];
+
+uint8_t r_nitro;
+uint8_t r_phos;
+uint8_t r_pota;
 /* USER CODE END 0 */
 
 /**
@@ -83,6 +89,12 @@ char temp_pota[16];
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  uint8_t lcd_nitro, lcd_phos, lcd_pota;
+  uint8_t lcd_nitro_previous, lcd_phos_previous, lcd_pota_previous;
+  uint8_t lcd_nitro_previous2, lcd_phos_previous2, lcd_pota_previous2;
+  uint8_t lcd_nitro_previous3, lcd_phos_previous3, lcd_pota_previous3;
+  uint8_t lcd_nitro_previous4, lcd_phos_previous4, lcd_pota_previous4;
+  uint8_t lcd_nitro_previous5, lcd_phos_previous5, lcd_pota_previous5;
 
   /* USER CODE END 1 */
 
@@ -110,6 +122,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   LCD_Init();
   LCD_Clear();
+  LCD_Set_Cursor(1, 1);
+  LCD_Write_String("Baslatiliyor...");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -118,12 +132,44 @@ int main(void)
   {
 	HAL_Delay(3000);
 
-	nitrogen();
-	phosphorous();
-	potassium();
+	lcd_nitro = nitrogen();
+	lcd_phos = phosphorous();
+	lcd_pota = potassium();
 
-	LCD_Set_Cursor(1, 1);
-	LCD_Write_String("Lutfen Bekleyin!");
+	if(lcd_nitro == 0 && lcd_phos == 0 && lcd_pota == 0){
+		LCD_Set_Cursor(1, 1);
+		LCD_Write_String("Olcume Hazir!  ");
+	}
+	else if(lcd_nitro != 0 && lcd_nitro != 1 && lcd_phos != 0 && lcd_phos != 1 && lcd_pota != 0 && lcd_pota != 1){
+		LCD_Set_Cursor(1, 1);
+		LCD_Write_String("Olcum Basliyor!");
+
+		if(lcd_nitro == lcd_nitro_previous5 && lcd_phos == lcd_phos_previous5 && lcd_pota == lcd_pota_previous5){
+			LCD_Set_Cursor(1, 1);
+			LCD_Write_String("Olcum Tamamlandi!");
+
+			return 0;
+		}
+	}
+	lcd_nitro_previous5 = lcd_nitro_previous4;
+	lcd_phos_previous5 = lcd_phos_previous4;
+	lcd_pota_previous5 = lcd_pota_previous4;
+
+	lcd_nitro_previous4 = lcd_nitro_previous3;
+	lcd_phos_previous4 = lcd_phos_previous3;
+	lcd_pota_previous4 = lcd_pota_previous3;
+
+	lcd_nitro_previous3 = lcd_nitro_previous2;
+	lcd_phos_previous3 = lcd_phos_previous2;
+	lcd_pota_previous3 = lcd_pota_previous2;
+
+	lcd_nitro_previous2 = lcd_nitro_previous;
+	lcd_phos_previous2 = lcd_phos_previous;
+	lcd_pota_previous2 = lcd_pota_previous;
+
+	lcd_nitro_previous = lcd_nitro;
+	lcd_phos_previous = lcd_phos;
+	lcd_pota_previous = lcd_pota;
 
     /* USER CODE END WHILE */
 
@@ -319,7 +365,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void nitrogen(void){
+uint8_t nitrogen(void){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
 	HAL_Delay(10);
@@ -333,14 +379,19 @@ void nitrogen(void){
 
 			sprintf(temp_nitro, "N: %d\n", val_nitro[5]);
 			HAL_UART_Transmit(&huart1, (uint8_t*)temp_nitro, strlen(temp_nitro), 50);
+
+			r_nitro = val_nitro[5];
 		}
 		else{
 			HAL_UART_Transmit(&huart1, (uint8_t*)"N: NULL\n", strlen("N: NULL\n"), 50);
+
+			r_nitro = (uint8_t)1;
 		}
 	}
+	return r_nitro;
 }
 
-void phosphorous(void){
+uint8_t phosphorous(void){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
 	HAL_Delay(10);
@@ -354,14 +405,19 @@ void phosphorous(void){
 
 			sprintf(temp_phos, "P: %d\n", val_phos[5]);
 			HAL_UART_Transmit(&huart1, (uint8_t*)temp_phos, strlen(temp_phos), 50);
+
+			r_phos = val_phos[5];
 		}
 		else{
 			HAL_UART_Transmit(&huart1, (uint8_t*)"P: NULL\n", strlen("P: NULL\n"), 50);
+
+			r_phos = (uint8_t)1;
 		}
 	}
+	return r_phos;
 }
 
-void potassium(void){
+uint8_t potassium(void){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
 	HAL_Delay(10);
@@ -375,11 +431,17 @@ void potassium(void){
 
 			sprintf(temp_pota, "K: %d\n", val_pota[5]);
 			HAL_UART_Transmit(&huart1, (uint8_t*)temp_pota, strlen(temp_pota), 50);
+
+			r_pota = val_pota[5];
 		}
 		else{
 			HAL_UART_Transmit(&huart1, (uint8_t*)"K: NULL\n", strlen("K: NULL\n"), 50);
+
+			r_pota = (uint8_t)1;
 		}
+
 	}
+	return r_pota;
 }
 /* USER CODE END 4 */
 
