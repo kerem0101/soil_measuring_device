@@ -24,8 +24,9 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-#include "../../16x2Lcd/LCD16x2.h"
-#include "../../16x2Lcd/LCD16x2.c"
+#include "../../Drivers/hw_drivers/lcd_drivers/LCD16x2.h"
+#include "../../Drivers/hw_drivers/npk_drivers/npk_driver.h"
+#include "../../Drivers/hw_drivers/bluetooth_drivers/bluetooth_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,6 +47,8 @@
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
+DMA_HandleTypeDef hdma_usart6_rx;
+DMA_HandleTypeDef hdma_usart6_tx;
 
 /* USER CODE BEGIN PV */
 
@@ -56,30 +59,15 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-uint8_t nitrogen(void);
-uint8_t phosphorous(void);
-uint8_t potassium(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t nitro[] = {0x01,0x03, 0x00, 0x1e, 0x00, 0x01, 0xe4, 0x0c};
-uint8_t phos[] = {0x01,0x03, 0x00, 0x1f, 0x00, 0x01, 0xb5, 0xcc};
-uint8_t pota[] = {0x01,0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};
 
-uint8_t val_nitro[9] = {0};
-uint8_t val_phos[9] = {0};
-uint8_t val_pota[9] = {0};
-
-char temp_nitro[16];
-char temp_phos[16];
-char temp_pota[16];
-
-uint8_t r_nitro;
-uint8_t r_phos;
-uint8_t r_pota;
 /* USER CODE END 0 */
 
 /**
@@ -89,12 +77,12 @@ uint8_t r_pota;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t lcd_nitro, lcd_phos, lcd_pota;
-  uint8_t lcd_nitro_previous, lcd_phos_previous, lcd_pota_previous;
-  uint8_t lcd_nitro_previous2, lcd_phos_previous2, lcd_pota_previous2;
-  uint8_t lcd_nitro_previous3, lcd_phos_previous3, lcd_pota_previous3;
-  uint8_t lcd_nitro_previous4, lcd_phos_previous4, lcd_pota_previous4;
-  uint8_t lcd_nitro_previous5, lcd_phos_previous5, lcd_pota_previous5;
+  uint8_t nitroVal, phosVal, potaVal;
+  uint8_t nitroVal1, phosVal1, potaVal1;
+  uint8_t nitroVal2, phosVal2, potaVal2;
+  uint8_t nitroVal3, phosVal3, potaVal3;
+  uint8_t nitroVal4, phosVal4, potaVal4;
+  uint8_t nitroVal5, phosVal5, potaVal5;
 
   /* USER CODE END 1 */
 
@@ -118,58 +106,68 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   LCD_Init();
   LCD_Clear();
   LCD_Set_Cursor(1, 1);
-  LCD_Write_String("Baslatiliyor...");
+  LCD_Write_String("Baslatiliyor... ");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	HAL_Delay(3000);
+	HAL_Delay(1000);
 
-	lcd_nitro = nitrogen();
-	lcd_phos = phosphorous();
-	lcd_pota = potassium();
+	nitroVal = get_nitrogen_data();
+	phosVal = get_phosphorous_data();
+	potaVal = get_potassium_data();
 
-	if(lcd_nitro == 0 && lcd_phos == 0 && lcd_pota == 0){
+	send_nitro_data_to_bluetooth(nitroVal);
+	send_phos_data_to_bluetooth(phosVal);
+	send_pota_data_to_bluetooth(potaVal);
+
+	if(nitroVal == 0 && phosVal == 0 && potaVal == 0){
 		LCD_Set_Cursor(1, 1);
 		LCD_Write_String("Olcume Hazir!  ");
 	}
-	else if(lcd_nitro != 0 && lcd_nitro != 1 && lcd_phos != 0 && lcd_phos != 1 && lcd_pota != 0 && lcd_pota != 1){
+	else if(nitroVal != 0 && nitroVal != 1 && phosVal != 0 && phosVal != 1 && potaVal != 0 && potaVal != 1){
 		LCD_Set_Cursor(1, 1);
-		LCD_Write_String("Olcum Basliyor!");
+		LCD_Write_String("Olcum Yapiliyor!");
 
-		if(lcd_nitro == lcd_nitro_previous5 && lcd_phos == lcd_phos_previous5 && lcd_pota == lcd_pota_previous5){
+		if(nitroVal == nitroVal1 && nitroVal == nitroVal2 && nitroVal == nitroVal3 && nitroVal == nitroVal4 && nitroVal == nitroVal5
+			&& phosVal == phosVal1 && phosVal == phosVal2 && phosVal == phosVal3 && phosVal == phosVal4 && phosVal == phosVal5
+			&& potaVal == potaVal1 && potaVal == potaVal2 && potaVal == potaVal3 && potaVal == potaVal4 && potaVal == potaVal5){
+
 			LCD_Set_Cursor(1, 1);
-			LCD_Write_String("Olcum Tamamlandi!");
+			LCD_Write_String("     Olcum      ");
+			LCD_Set_Cursor(2, 1);
+			LCD_Write_String("  Tamamlandi!   ");
 
 			return 0;
 		}
 	}
-	lcd_nitro_previous5 = lcd_nitro_previous4;
-	lcd_phos_previous5 = lcd_phos_previous4;
-	lcd_pota_previous5 = lcd_pota_previous4;
+	nitroVal5 = nitroVal4;
+	phosVal5 = phosVal4;
+	potaVal5 = potaVal4;
 
-	lcd_nitro_previous4 = lcd_nitro_previous3;
-	lcd_phos_previous4 = lcd_phos_previous3;
-	lcd_pota_previous4 = lcd_pota_previous3;
+	nitroVal4 = nitroVal3;
+	phosVal4 = phosVal3;
+	potaVal4 = potaVal3;
 
-	lcd_nitro_previous3 = lcd_nitro_previous2;
-	lcd_phos_previous3 = lcd_phos_previous2;
-	lcd_pota_previous3 = lcd_pota_previous2;
+	nitroVal3 = nitroVal2;
+	phosVal3 = phosVal2;
+	potaVal3 = potaVal2;
 
-	lcd_nitro_previous2 = lcd_nitro_previous;
-	lcd_phos_previous2 = lcd_phos_previous;
-	lcd_pota_previous2 = lcd_pota_previous;
+	nitroVal2 = nitroVal1;
+	phosVal2 = phosVal1;
+	potaVal2 = potaVal1;
 
-	lcd_nitro_previous = lcd_nitro;
-	lcd_phos_previous = lcd_phos;
-	lcd_pota_previous = lcd_pota;
+	nitroVal1 = nitroVal;
+	phosVal1 = phosVal;
+	potaVal1 = potaVal;
 
     /* USER CODE END WHILE */
 
@@ -322,6 +320,25 @@ static void MX_USART6_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+  /* DMA2_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -365,84 +382,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-uint8_t nitrogen(void){
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
-	HAL_Delay(10);
-	if(HAL_UART_Transmit(&huart6, nitro, sizeof(nitro), 50) == 0){
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, RESET);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, RESET);
 
-		HAL_UART_Receive(&huart6, (uint8_t*)val_nitro, sizeof(val_nitro), 200);
-
-		if(val_nitro[0]==0 && val_nitro[1]==1 && val_nitro[2]==3 && val_nitro[3]==2){
-
-			sprintf(temp_nitro, "N: %d\n", val_nitro[5]);
-			HAL_UART_Transmit(&huart1, (uint8_t*)temp_nitro, strlen(temp_nitro), 50);
-
-			r_nitro = val_nitro[5];
-		}
-		else{
-			HAL_UART_Transmit(&huart1, (uint8_t*)"N: NULL\n", strlen("N: NULL\n"), 50);
-
-			r_nitro = (uint8_t)1;
-		}
-	}
-	return r_nitro;
-}
-
-uint8_t phosphorous(void){
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
-	HAL_Delay(10);
-	if(HAL_UART_Transmit(&huart6, phos, sizeof(phos), 50) == 0){
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, RESET);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, RESET);
-
-		HAL_UART_Receive(&huart6, (uint8_t*)val_phos, sizeof(val_phos), 200);
-
-		if(val_phos[0]==0 && val_phos[1]==1 && val_phos[2]==3 && val_phos[3]==2){
-
-			sprintf(temp_phos, "P: %d\n", val_phos[5]);
-			HAL_UART_Transmit(&huart1, (uint8_t*)temp_phos, strlen(temp_phos), 50);
-
-			r_phos = val_phos[5];
-		}
-		else{
-			HAL_UART_Transmit(&huart1, (uint8_t*)"P: NULL\n", strlen("P: NULL\n"), 50);
-
-			r_phos = (uint8_t)1;
-		}
-	}
-	return r_phos;
-}
-
-uint8_t potassium(void){
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, SET);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, SET);
-	HAL_Delay(10);
-	if(HAL_UART_Transmit(&huart6, pota, sizeof(pota), 50) == 0){
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, RESET);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, RESET);
-
-		HAL_UART_Receive(&huart6, (uint8_t*)val_pota, sizeof(val_pota), 200);
-
-		if(val_pota[0]==0 && val_pota[1]==1 && val_pota[2]==3 && val_pota[3]==2){
-
-			sprintf(temp_pota, "K: %d\n", val_pota[5]);
-			HAL_UART_Transmit(&huart1, (uint8_t*)temp_pota, strlen(temp_pota), 50);
-
-			r_pota = val_pota[5];
-		}
-		else{
-			HAL_UART_Transmit(&huart1, (uint8_t*)"K: NULL\n", strlen("K: NULL\n"), 50);
-
-			r_pota = (uint8_t)1;
-		}
-
-	}
-	return r_pota;
-}
 /* USER CODE END 4 */
 
 /**

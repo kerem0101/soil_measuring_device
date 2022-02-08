@@ -6,9 +6,7 @@
  */
 #include "LCD16x2.h"
 #include "LCD16x2_cfg.h"
-#include "LCD16x2_cfg.c"
-#include "../../util/DWT_Delay.h"
-#include "../../util/DWT_Delay.c"
+#include "../util/DWT_Delay.h"
 
 //-----[ Alphanumeric LCD 16x2 Routines ]-----
 

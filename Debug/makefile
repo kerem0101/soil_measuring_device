@@ -9,6 +9,10 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Drivers/hw_drivers/util/subdir.mk
+-include Drivers/hw_drivers/npk_drivers/subdir.mk
+-include Drivers/hw_drivers/lcd_drivers/subdir.mk
+-include Drivers/hw_drivers/bluetooth_drivers/subdir.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk

@@ -23,4 +23,8 @@ SUBDIRS := \
 Core/Src \
 Core/Startup \
 Drivers/STM32F4xx_HAL_Driver/Src \
+Drivers/hw_drivers/bluetooth_drivers \
+Drivers/hw_drivers/lcd_drivers \
+Drivers/hw_drivers/npk_drivers \
+Drivers/hw_drivers/util \
 
