@@ -8,7 +8,7 @@
 #include "npk_driver.h"
 #include "main.h"
 
-UART_HandleTypeDef huart6;
+extern UART_HandleTypeDef huart6;
 
 uint8_t get_nitrogen_data(void){
 

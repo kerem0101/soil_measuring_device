@@ -1,3 +1,4 @@
-bluetooth_driver.c:14:6:send_nitro_data_to_bluetooth	32	static
-bluetooth_driver.c:27:6:send_phos_data_to_bluetooth	32	static
-bluetooth_driver.c:40:6:send_pota_data_to_bluetooth	32	static
+../Drivers/hw_drivers/bluetooth_drivers/bluetooth_driver.c:14:6:send_nitro_data_to_bluetooth	32	static
+../Drivers/hw_drivers/bluetooth_drivers/bluetooth_driver.c:27:6:send_phos_data_to_bluetooth	32	static
+../Drivers/hw_drivers/bluetooth_drivers/bluetooth_driver.c:40:6:send_pota_data_to_bluetooth	32	static
+../Drivers/hw_drivers/bluetooth_drivers/bluetooth_driver.c:53:6:send_hum_data_to_bluetooth	32	static

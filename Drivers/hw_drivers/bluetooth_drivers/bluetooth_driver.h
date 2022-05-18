@@ -11,5 +11,6 @@
 void send_nitro_data_to_bluetooth(uint8_t data);
 void send_phos_data_to_bluetooth(uint8_t data);
 void send_pota_data_to_bluetooth(uint8_t data);
+void send_hum_data_to_bluetooth(uint32_t data);
 
 #endif /* BLUETOOTH_DRIVERS_BLUETOOTH_DRIVER_H_ */

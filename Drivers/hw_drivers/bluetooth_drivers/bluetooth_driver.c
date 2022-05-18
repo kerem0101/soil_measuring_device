@@ -9,7 +9,7 @@
 #include "bluetooth_driver.h"
 #include "main.h"
 
-UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart1;
 
 void send_nitro_data_to_bluetooth(uint8_t data){
 
@@ -49,3 +49,12 @@ void send_pota_data_to_bluetooth(uint8_t data){
 		HAL_UART_Transmit(&huart1, (uint8_t*)send_pota, strlen(send_pota), 50);
 	}
 }
+
+void send_hum_data_to_bluetooth(uint32_t data){
+
+	char send_hum[16];
+
+	sprintf(send_hum, "Hum: %d\n", data);
+	HAL_UART_Transmit(&huart1, (uint8_t*)send_hum, strlen(send_hum), 50);
+}
+
